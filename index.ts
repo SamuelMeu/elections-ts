@@ -1,8 +1,7 @@
 import {ApplicationCommandPermissionType, Client, event, GatewayIntents, TextChannel} from "./deps.ts"
 import config from "./config.ts";
 import { commands } from "./commands.ts";
-import { getGuild, setChannel, setMessage, switchElections } from "./db.ts";
-import { ApplicationCommandPermissionsManager } from "https://deno.land/x/harmony@v2.9.1/mod.ts";
+import { getGuild, setChannel, setMessage, setRole, switchElections } from "./db.ts";
 
 type vote = {
     userid: number, 
@@ -40,7 +39,6 @@ client.on('interactionCreate', async (interaction) => {
                     interaction.respond({content: 'Elections already started.', ephemeral: true})
                 } else {
                     interaction.respond({content: 'OK.', ephemeral: true})
-                    console.log(gg)
                     const channel = await interaction.guild!.channels.get(gg.channelID!.toString()) as TextChannel //le toString c juste pour pas que typescript chiale
                     channel.send(gg.message!)
                     switchElections(interaction.guild!.id)
@@ -70,6 +68,23 @@ client.on('interactionCreate', async (interaction) => {
                     ]
                 }]
             })
+        }
+        //setrole
+        if(interaction.name == "setrole") {
+            const role = interaction.options[0].value
+            const rl = await interaction.guild.roles.get(role)
+            setRole(interaction.guild!.id, role)
+            interaction.respond({content: 'Role set as ' + rl!.name, ephemeral: true})
+        }
+        //endelections
+        if(interaction.name == "endelections") {
+            const gg = getGuild(interaction.guild!.id)[0]
+            if(gg.elections) {
+                switchElections(interaction.guild!.id)
+                interaction.respond({content: 'Elections ended', ephemeral: true})
+            } else {
+                interaction.respond({content: 'There is no current elections', ephemeral: true})
+            }
         }
     }
     //modals

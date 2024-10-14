@@ -14,5 +14,21 @@ export const commands: SlashCommandPartial[] = [
     {
         name: "setmessage",
         description: "opens a promt to set the message for the elections"
+    },
+    {
+        name: "setrole",
+        description: "sets the role of the president",
+        options: [
+            {
+                name: "role",
+                description: "name of the role",
+                type: SlashCommandOptionType.ROLE,
+                required: true
+            }
+        ]
+    },
+    {
+        name: "endelections",
+        description: "ends the elections",
     }
 ];
