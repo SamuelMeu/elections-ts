@@ -4,11 +4,11 @@ import { commands } from "./commands.ts";
 import { getGuild, setChannel, setMessage, setRole, switchElections } from "./db.ts";
 
 type vote = {
-    userid: number, 
-    vote: number
+    userid: string, 
+    vote: string
 }
 type Ballot = {
-    guild: number,
+    guild: string,
     votes: vote[]
 }
 const ballots: Ballot[] = []
@@ -42,6 +42,7 @@ client.on('interactionCreate', async (interaction) => {
                     const channel = await interaction.guild!.channels.get(gg.channelID!.toString()) as TextChannel //le toString c juste pour pas que typescript chiale
                     channel.send(gg.message!)
                     switchElections(interaction.guild!.id)
+
                 }
             }
         }
@@ -84,6 +85,26 @@ client.on('interactionCreate', async (interaction) => {
                 interaction.respond({content: 'Elections ended', ephemeral: true})
             } else {
                 interaction.respond({content: 'There is no current elections', ephemeral: true})
+            }
+        }
+        //vote
+        if(interaction.name == "vote") {
+            const gg = getGuild(interaction.guild!.id)[0]
+            if(!gg.elections) return interaction.respond({content: 'There is no current elections', ephemeral: true})
+            const candidate = interaction.options[0].value
+            const votes = ballots.find(b => b.guild === interaction.guild!.id)
+            const vt:vote = {userid: interaction.user.id, vote: candidate}
+            if(!votes) ballots.push({guild: interaction.guild!.id, votes: [vt]}) && interaction.respond({content: 'Vote registered', ephemeral: true})
+            else {
+                const loc = votes.votes.find(v => v.userid === interaction.user.id)
+                if(loc) {
+                    loc.vote = candidate
+                    interaction.respond({content: 'Vote updated', ephemeral: true})
+                }
+                else {
+                    votes.votes.push(vt)
+                    interaction.respond({content: 'Vote registered', ephemeral: true})
+                }
             }
         }
     }

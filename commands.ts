@@ -30,5 +30,17 @@ export const commands: SlashCommandPartial[] = [
     {
         name: "endelections",
         description: "ends the elections",
+    }, 
+    {
+        name: "vote",
+        description: "votes for a candidate",
+        options: [
+            {
+                name: "candidate",
+                description: "the candidate you want to vote for",
+                type: SlashCommandOptionType.USER,
+                required: true
+            }
+        ]
     }
 ];

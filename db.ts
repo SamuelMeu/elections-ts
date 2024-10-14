@@ -30,6 +30,7 @@ export function setMessage(guildId: string, message: string) {
     check(guildId)
     db.query(`UPDATE guilds SET message = ? WHERE guildID = ?`, [message, guildId])
 }
+//FIN DE NOTE
 export function switchElections(guildId: string) {
     db.query(`UPDATE guilds SET elections = NOT elections WHERE guildID = ?`, [guildId])
 }
