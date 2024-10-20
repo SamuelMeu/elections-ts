@@ -14,7 +14,7 @@ type Ballot = {
 }
 const ballots: Ballot[] = []
 
-const client = new Client({token: config.token, intents: [GatewayIntents.GUILDS, GatewayIntents.GUILD_MESSAGES]})
+const client = new Client({token: config.token, intents: [GatewayIntents.GUILDS, GatewayIntents.GUILD_MESSAGES, GatewayIntents.GUILD_MEMBERS]})
 
 client.on('ready', async () => {
     console.log(`Logged in as ${client.user?.tag}!`);
