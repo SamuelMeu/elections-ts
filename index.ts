@@ -117,7 +117,7 @@ client.on('interactionCreate', async (interaction) => {
                 //give the role
                 const member = await interaction.guild.members.get(winner)
                 member?.roles.add(gg.role!.toString())
-                delete ballots[ballots.findIndex(m => m.guild === interaction.guild!.id)]
+                ballots.find(m => m.guild === interaction.guild!.id)!.votes = []
             } else {
                 interaction.respond({embeds: [noelections], ephemeral: true})
             }
@@ -127,7 +127,7 @@ client.on('interactionCreate', async (interaction) => {
             const gg = getGuild(interaction.guild!.id)[0]
             if(!gg.elections) return interaction.respond({embeds: [noelections], ephemeral: true})
             const candidate = interaction.options[0].value
-            const votes = ballots.find(b => b.guild === interaction.guild!.id)
+            const votes = ballots.find(b => b.guild == interaction.guild!.id)
             const vt:vote = {userid: interaction.user.id, vote: candidate}
             if(!votes) ballots.push({guild: interaction.guild!.id, votes: [vt]}) && interaction.respond({embeds: [voteregistered], ephemeral: true})
             else {
