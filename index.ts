@@ -3,6 +3,7 @@ import config from "./config.ts";
 import { commands } from "./commands.ts";
 import { getGuild, setChannel, setMessage, setRole, switchElections } from "./db.ts";
 import { electionsstarted, nochannel, norole, notinserver, startelections, channelset, messageset, roleset, tie, listresults, won, noelections, electionsend, permissionmissing, voteupdated, voteregistered, elecmsg } from "./embeds.ts";
+import { guildStickersUpdate } from "https://deno.land/x/harmony@v2.9.1/src/gateway/handlers/guildStickersUpdate.ts";
 
 type vote = {
     userid: string, 
@@ -14,7 +15,7 @@ type Ballot = {
 }
 const ballots: Ballot[] = []
 
-const client = new Client({token: config.token, intents: [GatewayIntents.GUILDS, GatewayIntents.GUILD_MESSAGES, GatewayIntents.GUILD_MEMBERS]})
+const client = new Client({token: config.token, intents: [GatewayIntents.GUILDS, GatewayIntents.GUILD_MEMBERS, GatewayIntents.GUILD_MODERATION]})
 
 client.on('ready', async () => {
     console.log(`Logged in as ${client.user?.tag}!`);
@@ -38,6 +39,7 @@ client.on('interactionCreate', async (interaction) => {
             else {
                 const gg = getGuild(interaction.guild!.id)[0]
                 if(gg.role == 'none') return interaction.respond({embeds: [norole], ephemeral: true})
+                if(gg.channelID == 'none') return interaction.respond({embeds: [nochannel], ephemeral: true})
                 if(gg.elections) {
                     interaction.respond({embeds: [electionsstarted], ephemeral: true})
                 } else {
@@ -90,11 +92,15 @@ client.on('interactionCreate', async (interaction) => {
             const gg = getGuild(interaction.guild!.id)[0]
             if(gg.elections) {
                 //remove old role
-                const old = await interaction.guild.roles.get(gg.role!.toString())
-                const members = await interaction.guild.members.fetchList()
-                const guy = members.find(m => m.roles.get(gg.role!.toString()))
-                if(guy) guy.roles.remove(gg.role!.toString())
-                console.log('removed role from', guy?.user.username)
+                const members = await interaction.guild.members.fetchList(1000)
+                members.forEach(async m => {
+                    const rls = await m?.roles.get(gg.role!.toString())
+                    if(rls) {
+                        m.roles.remove(gg.role!.toString())
+                        console.log('removed role from', m.user.username)
+                    }
+                })
+                //end
                 switchElections(interaction.guild!.id)
                 interaction.respond({embeds: [electionsend], ephemeral: true})
                 //lecture des ballots 
